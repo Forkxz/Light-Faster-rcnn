@@ -108,6 +108,13 @@ def main(args):
 
     # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_step_size, gamma=args.lr_gamma)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=args.lr_steps, gamma=args.lr_gamma)
+    
+    if args.test_only:
+        print("Start testing")
+        checkpoint = torch.load(args.resume)
+        model.load_state_dict(checkpoint)
+        evaluate(model, data_loader_test, device=device)
+        return
 
     if args.resume:
         checkpoint = torch.load(args.resume, map_location='cpu')
@@ -116,9 +123,7 @@ def main(args):
         lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
         args.start_epoch = checkpoint['epoch'] + 1
 
-    if args.test_only:
-        evaluate(model, data_loader_test, device=device)
-        return
+
 
     print("Start training")
     start_time = time.time()
@@ -152,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument('--data-path', default='D:/COCO', help='dataset')
     parser.add_argument('--dataset', default='coco', help='dataset')
     parser.add_argument('--model',
-                        default='fasterrcnn_shufflenet',
+                        default='maskrcnn_resnet50_fpn',
                         help='model')  ####fasterrcnn_shufflenet
     parser.add_argument('--device', default='cpu', help='device')
     parser.add_argument('-b', '--batch-size', default=1, type=int,
